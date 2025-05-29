@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multi Countdown Timers</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      text-align: center;
+      padding: 30px;
+    }
+    .timer {
+      background: #fff;
+      padding: 20px;
+      margin: 20px auto;
+      width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .display {
+      font-size: 2em;
+      margin: 10px 0;
+    }
+    select, button {
+      margin: 5px;
+      padding: 5px 10px;
+      font-size: 1em;
+    }
+    .buttons {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Countdown Timers</h1>
+
+  <!-- Use your custom buzzer -->
+  <audio id="buzzer" preload="auto">
+    <source src="mixkit-electric-fence-alert-2969.wav" type="audio/wav">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Timer 1 -->
+  <div class="timer" id="timer1">
+    <h2>Timer 1</h2>
+    <div>
+      <select class="hours"></select> :
+      <select class="minutes"></select> :
+      <select class="seconds"></select>
+    </div>
+    <div class="display">00:00:00</div>
+    <div class="buttons">
+      <button class="start">Start</button>
+      <button class="stop">Stop</button>
+      <button class="reset">Reset</button>
+    </div>
+  </div>
+
+  <!-- Timer 2 -->
+  <div class="timer" id="timer2">
+    <h2>Timer 2</h2>
+    <div>
+      <select class="hours"></select> :
+      <select class="minutes"></select> :
+      <select class="seconds"></select>
+    </div>
+    <div class="display">00:00:00</div>
+    <div class="buttons">
+      <button class="start">Start</button>
+      <button class="stop">Stop</button>
+      <button class="reset">Reset</button>
+    </div>
+  </div>
+
+  <!-- Timer 3 -->
+  <div class="timer" id="timer3">
+    <h2>Timer 3</h2>
+    <div>
+      <select class="hours"></select> :
+      <select class="minutes"></select> :
+      <select class="seconds"></select>
+    </div>
+    <div class="display">00:00:00</div>
+    <div class="buttons">
+      <button class="start">Start</button>
+      <button class="stop">Stop</button>
+      <button class="reset">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    function populateOptions(select, max) {
+      for (let i = 0; i <= max; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = String(i).padStart(2, '0');
+        select.appendChild(option);
+      }
+    }
+
+    function setupTimer(timerEl) {
+      const display = timerEl.querySelector('.display');
+      const startBtn = timerEl.querySelector('.start');
+      const stopBtn = timerEl.querySelector('.stop');
+      const resetBtn = timerEl.querySelector('.reset');
+      const hoursSel = timerEl.querySelector('.hours');
+      const minutesSel = timerEl.querySelector('.minutes');
+      const secondsSel = timerEl.querySelector('.seconds');
+      const buzzer = document.getElementById('buzzer');
+
+      populateOptions(hoursSel, 23);
+      populateOptions(minutesSel, 59);
+      populateOptions(secondsSel, 59);
+
+      let interval = null;
+      let remainingSeconds = 0;
+
+      function updateDisplay() {
+        const hrs = Math.floor(remainingSeconds / 3600);
+        const mins = Math.floor((remainingSeconds % 3600) / 60);
+        const secs = remainingSeconds % 60;
+        display.textContent = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+
+      startBtn.addEventListener('click', () => {
+        if (interval) return;
+        const hours = parseInt(hoursSel.value);
+        const minutes = parseInt(minutesSel.value);
+        const seconds = parseInt(secondsSel.value);
+
+        remainingSeconds = hours * 3600 + minutes * 60 + seconds;
+        if (remainingSeconds <= 0) return;
+
+        updateDisplay();
+
+        interval = setInterval(() => {
+          remainingSeconds--;
+          updateDisplay();
+          if (remainingSeconds <= 0) {
+            clearInterval(interval);
+            interval = null;
+            buzzer.play(); // ✅ Play custom buzzer
+          }
+        }, 1000);
+      });
+
+      stopBtn.addEventListener('click', () => {
+        clearInterval(interval);
+        interval = null;
+      });
+
+      resetBtn.addEventListener('click', () => {
+        clearInterval(interval);
+        interval = null;
+        remainingSeconds = 0;
+        display.textContent = "00:00:00";
+        hoursSel.value = "0";
+        minutesSel.value = "0";
+        secondsSel.value = "0";
+      });
+    }
+
+    document.querySelectorAll('.timer').forEach(setupTimer);
+  </script>
+
+</body>
+</html>
